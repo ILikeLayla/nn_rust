@@ -1,5 +1,8 @@
 {
     "rust-analyzer.linkedProjects": [
         ".\\Cargo.toml"
-    ]
+    ],
+    "doki.background.path": "D:\\files\\Layla-莱依拉\\picture\\2.png",
+    "doki.wallpaper.path": "D:\\files\\Layla-莱依拉\\picture\\2.png",
+    "doki.statusbar.name": "Layla"
 }

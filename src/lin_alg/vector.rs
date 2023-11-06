@@ -136,6 +136,6 @@ impl std::ops::SubAssign for Vector {
 
 impl std::fmt::Display for Vector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[{}]", self.val.iter().map(|a| {format!("{}", a)}).collect::<Vec<_>>().join(", "))
+        write!(f, "({})", self.val.iter().map(|a| {format!("{}", a)}).collect::<Vec<_>>().join(", "))
     }
 }

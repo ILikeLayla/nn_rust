@@ -138,13 +138,13 @@ impl Matrix {
     pub fn get_val(&self) -> Vec<Vec<f64>> {
         let mut out = Vec::new();
         for i in self.vec.iter() {
-            out.push(i.get_val())
+            out.push(i.get_val().clone())
         };
         out
     }
 
     pub fn get_determinant(&self) -> Determinant {
-        let mut out = Determinant::
+        Determinant::from_matrix(self)
     }
 }
 
