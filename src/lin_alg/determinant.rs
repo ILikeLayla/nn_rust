@@ -2,7 +2,7 @@ use std::iter::zip;
 
 use super::{Matrix, Vector};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum DeterNum {
     Vec(Vector),
     Float(f64)
@@ -62,7 +62,13 @@ impl std::ops::Div for DeterNum {
     }
 }
 
-#[derive(Clone)]
+impl std::ops::AddAssign for DeterNum {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = self.clone() + rhs
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Determinant {
     val: Vec<Vec<DeterNum>>
 }
@@ -100,20 +106,22 @@ impl Determinant {
             };
             buf.push(buf_1)
         };
-        let out = Self {
-            val: buf
-        };
+        Self::from_vec_deter(buf)
+    }
+
+    pub fn from_vec_deter(val: Vec<Vec<DeterNum>>) -> Self {
+        let out = Self { val };
         out.check_shape();
         out
     }
 
-    fn check_shape(self) {
+    fn check_shape(&self) {
         if self.val.len() != 0 && self.val.len() != self.val[0].len() {
             panic!("This shape is not available to determinant!")
         }
     }
 
-    fn change_place(&mut self, x: usize, y: usize, val: DeterNum) {
+    pub fn change_place(&mut self, x: usize, y: usize, val: DeterNum) {
         self.val[y][x] = val
     }
 
@@ -126,15 +134,55 @@ impl Determinant {
     }
 
     pub fn cal(&self) -> DeterNum {
+
+        if self.val.len() == 0 {
+            return DeterNum::Float(0.0)
+        } else if self.val.len() == 1 {
+            return self.val[0][0].clone()
+        } else if self.val.len() == 2 {
+            return self.val[0][0].clone() * self.val[1][1].clone() -
+                   self.val[0][1].clone() * self.val[1][0].clone()
+        }
+
         let mut add = Vec::new();
         let mut sub = Vec::new();
 
+        for i in 0..self.val[0].len() {
+            let mut buf = Vec::new();
+            for row in 1..self.val.len() {
+                let mut buf_1 = Vec::new();
+                for col in 0..self.val[0].len() {
+                    if col != i {
+                        buf_1.push(self.val[row][col].clone());
+                    }
+                };
+                buf.push(buf_1)
+            };
+
+            let cal = self.val[0][i].clone() * Self::from_vec_deter(buf).cal();
+            if i % 2 == 0 { add.push(cal) } else { sub.push(cal) }
+        }
         
+        let mut buf_add = add[0].clone();
+        for i in 1..add.len() {
+            buf_add += add[i].clone()
+        };
+
+        let mut buf_sub = sub[0].clone();
+        for i in 1..sub.len() {
+            buf_sub += sub[i].clone()
+        };
+
+        return buf_add - buf_sub
     }
 }
 
 impl std::fmt::Display for Determinant {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.val.len() == 0 {
+            return write!(f, "| |")
+        }
+
         let mut words_buf = Vec::new();
         let mut words = Vec::new();
         let mut length = Vec::new();
@@ -155,11 +203,11 @@ impl std::fmt::Display for Determinant {
         // get the max length for each column
         let max_length = {
             let mut max_length = Vec::new();
-            for i in length.iter() {
+            for i in 0..length[0].len() {
                 let mut max = 0;
-                for j in i.iter() {
-                    if j > &max {
-                        max = *j
+                for j in 0..length.len() {
+                    if length[j][i] > max {
+                        max = length[j][i]
                     }
                 }
                 max_length.push(max)

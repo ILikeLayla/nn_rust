@@ -1,6 +1,6 @@
-use super::Matrix;
+use super::{Determinant, Matrix, DeterNum};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Vector {
     val: Vec<f64>
 }
@@ -96,9 +96,42 @@ impl Vector {
         &self.val
     }
 
-    // pub fn cross_product(&self, rhs: Vector) -> Vector {
+    pub fn cross_product(&self, rhs: Vector) -> Vector {
+        if ! self.same_shape(&rhs) { panic!("Mismatched shapes!") }
 
-    // }
+        let length = self.val.len();
+        let mut buf = Vec::new();
+        for _ in 0..length {
+            let mut buf_1 = Vec::new();
+            for _ in 0..length {
+                buf_1.push(1.0)
+            };
+            buf.push(buf_1)
+        };
+        let mut deter = Determinant::from_vec(buf);
+
+        for i in 0..length {
+            let mut buf = Vec::new();
+            for j in 0..length {
+                if j == i {
+                    buf.push(1.0)
+                } else {
+                    buf.push(0.0)
+                }
+            }
+            deter.change_place_vector(i, 0, Self::from_vec(buf))
+        };
+
+        for i in 0..length {
+            deter.change_place_float(i, 1, self.val[i]);
+            deter.change_place_float(i, 2, rhs.val[i])
+        };
+    
+        match deter.cal() {
+            DeterNum::Float(_) => panic!("Shouldn't be here!"),
+            DeterNum::Vec(vec) => vec
+        }
+    }
 }
 
 impl std::ops::Add for Vector {
