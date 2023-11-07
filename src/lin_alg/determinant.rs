@@ -129,7 +129,7 @@ impl Determinant {
         let mut add = Vec::new();
         let mut sub = Vec::new();
 
-
+        
     }
 }
 
