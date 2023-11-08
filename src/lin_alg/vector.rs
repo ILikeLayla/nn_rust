@@ -57,6 +57,14 @@ impl Vector {
         out
     }
 
+    pub fn oper_assign(&mut self, op: &(dyn Fn(f64) -> f64)) {
+        for i in self.val.iter_mut() {
+            *i = op(*i)
+        }
+    }
+
+    pub fn 
+
     pub fn strech(&self, times: f64) -> Self {
         self.oper(&|i| { i * times })
     }
@@ -131,6 +139,40 @@ impl Vector {
             DeterNum::Float(_) => panic!("Shouldn't be here!"),
             DeterNum::Vec(vec) => vec
         }
+    }
+
+    pub fn iter(&self) -> std::slice::Iter<'_, f64> {
+        self.val.iter()
+    }
+
+    pub fn len(&self) -> usize {
+        self.val.len()
+    }
+
+    pub fn softmax(&self) -> Self {
+        let buf = self.oper(&| i | { i.exp() });
+        let sum = buf.sum();
+        buf.oper(&| i | { i/sum })
+    }
+
+    pub fn softmax_assign(&mut self) {
+        *self = self.softmax()
+    }
+
+    pub fn sigmoid(&self) -> Self {
+        self.oper(&| i | { 1.0 / (1.0 + (-i).exp() )})
+    }
+
+    pub fn sigmoid_assign(&mut self) {
+        *self = self.sigmoid()
+    }
+
+    pub fn relu(&self) -> Self {
+        self.oper(&| i | { if i > 0.0 { i } else { 0.0 }})
+    }
+
+    pub fn relu_assign(&mut self) {
+        *self = self.relu()
     }
 }
 

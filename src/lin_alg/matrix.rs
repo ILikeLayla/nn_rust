@@ -1,4 +1,4 @@
-use super::{Determinant, Vector};
+use super::{Determinant, Vector, DeterNum};
 
 #[derive(Clone)]
 pub struct Matrix {
@@ -32,6 +32,20 @@ impl Matrix {
             buf.push(Vector::from_i(val[i]))
         }
         Self { vec: buf, shape: (X, Y) }
+    }
+
+    pub fn from_vec(val: Vec<Vec<f64>>) -> Self {
+        let mut buf = Vec::new();
+        let standard_length = val[0].len();
+        for i in val.iter() {
+            if i.len() == standard_length {
+                buf.push(Vector::from_vec(i.to_vec()))
+            } else {
+                panic!("Mismatched shapes!")
+            }
+        };
+
+        Self { vec: buf, shape: (standard_length, val.len()) }
     }
 
     pub fn shape(&self) -> (usize, usize) {
@@ -145,6 +159,70 @@ impl Matrix {
 
     pub fn get_determinant(&self) -> Determinant {
         Determinant::from_matrix(self)
+    }
+
+    pub fn det(&self) -> f64 {
+        let deter = self.get_determinant();
+        match deter.cal() {
+            DeterNum::Float(num) => num,
+            DeterNum::Vec(_) => panic!("Shouldn't be here.")
+        }
+    }
+
+    pub fn t(&self) -> Self {
+        let mut buf = Vec::new();
+        for i in 0..self.shape.0 {
+            let mut buf_1 = Vec::new();
+            for j in 0..self.shape.1 {
+                buf_1.push(self.get(i, j))
+            }
+            buf.push(buf_1)
+        };
+        Matrix::from_vec(buf)
+    }
+
+    pub fn exp(&self) -> Self {
+        self.oper(&|i| {i.exp()})
+    }
+
+    pub fn softmax(&self) -> Self {
+        let mut out = Matrix::new(self.shape);
+        let exp = self.exp();
+
+        let mut exp_sum = Vec::new();
+        for i in 0..self.vec[0].len() {
+            let mut sum = 0.0;
+            for j in 0..self.vec.len() {
+                sum += exp.get(i, j)
+            };
+            exp_sum.push(sum)
+        };
+
+        for i in 0..self.vec.len() {
+            for j in 0..self.vec[0].len() {
+                let val = exp.get(j, i) / exp_sum[j];
+                out.change_place((j, i), val)
+            }
+        };
+        out
+    }
+
+    pub fn softmax_assign(&mut self) {
+        *self = self.softmax()
+    }
+
+    pub fn sigmoid(&self) -> Self {
+        let mut buf = self.clone();
+        for i in buf.vec.iter_mut() {
+            i.sigmoid_assign()
+        };
+        buf
+    }
+
+    pub fn sigmoid_assign(&mut self) {
+        for i in self.vec.iter_mut() {
+            i.sigmoid_assign()
+        }
     }
 }
 
