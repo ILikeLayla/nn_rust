@@ -1,4 +1,4 @@
-use super::{Determinant, Vector, DeterNum};
+use super::{Determinant, Vector, DeterNum, func};
 
 #[derive(Clone)]
 pub struct Matrix {
@@ -64,13 +64,26 @@ impl Matrix {
         out
     }
 
+    pub fn oper_assign(&mut self, op: &(dyn Fn(f64) -> f64)) {
+        for i in self.vec.iter_mut() {
+            i.oper_assign(op)
+        }
+    }
+
     pub fn oper_with(&self, rhs: Matrix, op: &(dyn Fn(f64, f64)-> f64)) -> Self {
         if ! self.same_shape(&rhs) { panic!("The shapes are nut matched!") }
         let mut out = self.clone();
         for i in 0..self.shape.1 {
-            out.vec[i] = out.vec[i].oper_with(rhs.vec[i].clone(), op);
+            out.vec[i].oper_with_assign(rhs.vec[i].clone(), op);
         };
         out
+    }
+
+    pub fn oper_with_assign(&mut self, rhs: Matrix, op: &(dyn Fn(f64, f64)-> f64)) {
+        if ! self.same_shape(&rhs) { panic!("The shapes are nut matched!") }
+        for i in 0..self.shape.1 {
+            self.vec[i].oper_with_assign(rhs.vec[i].clone(), op);
+        };
     }
 
     pub fn change_place(&mut self, place: (usize, usize), val: f64) {

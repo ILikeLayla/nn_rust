@@ -5,3 +5,5 @@ mod determinant;
 pub use matrix::*;
 pub use vector::*;
 pub use determinant::*;
+
+use super::func;

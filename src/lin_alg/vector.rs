@@ -1,4 +1,4 @@
-use super::{Determinant, Matrix, DeterNum};
+use super::{Determinant, Matrix, DeterNum, func};
 
 #[derive(Clone, Debug)]
 pub struct Vector {
@@ -63,15 +63,19 @@ impl Vector {
         }
     }
 
-    pub fn 
+    pub fn oper_with_assign(&mut self, rhs: Vector, op: &(dyn Fn(f64, f64) -> f64)) {
+        if ! self.same_shape(&rhs) { panic!("The shapes are not matched!") }
+        for i in 0..self.shape() {
+            self.val[i] = op(self.val[i], rhs.val[i])
+        };
+    }
 
     pub fn strech(&self, times: f64) -> Self {
         self.oper(&|i| { i * times })
     }
 
     pub fn strech_assign(&mut self, times: f64) {
-        let buf = self.strech(times);
-        *self = buf
+        self.oper_assign(&|i| { i * times })
     }
 
     pub fn slice<const L: usize>(&self) -> [f64; L] {
@@ -160,19 +164,19 @@ impl Vector {
     }
 
     pub fn sigmoid(&self) -> Self {
-        self.oper(&| i | { 1.0 / (1.0 + (-i).exp() )})
+        self.oper(&| i | { func::sigmoid(i) })
     }
 
     pub fn sigmoid_assign(&mut self) {
-        *self = self.sigmoid()
+        self.oper_assign(&| i | { func::sigmoid(i) })
     }
 
     pub fn relu(&self) -> Self {
-        self.oper(&| i | { if i > 0.0 { i } else { 0.0 }})
+        self.oper(&| i | { func::relu(i) })
     }
 
     pub fn relu_assign(&mut self) {
-        *self = self.relu()
+        self.oper_assign(&| i | { func::relu(i) })
     }
 }
 
@@ -199,13 +203,13 @@ impl std::ops::Mul for Vector {
 
 impl std::ops::AddAssign for Vector {
     fn add_assign(&mut self, rhs: Self) {
-        *self = self.oper_with(rhs, &|i ,j| { i + j })
+        self.oper_with_assign(rhs, &|i ,j| { i + j })
     }
 }
 
 impl std::ops::SubAssign for Vector {
     fn sub_assign(&mut self, rhs: Self) {
-        *self = self.oper_with(rhs, &|i ,j| { i - j })
+        self.oper_with_assign(rhs, &|i ,j| { i - j })
     }
 }
 

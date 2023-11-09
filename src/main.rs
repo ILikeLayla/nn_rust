@@ -1,4 +1,5 @@
 mod lin_alg;
+mod func;
 
 fn main() {
     let a = lin_alg::Matrix::from_i([

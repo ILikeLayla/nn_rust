@@ -35,7 +35,7 @@ impl std::ops::Sub for DeterNum {
         match (self, rhs) {
             (DeterNum::Float(a), DeterNum::Float(b)) => DeterNum::Float(a-b),
             (DeterNum::Vec(a), DeterNum::Vec(b)) => DeterNum::Vec(a-b),
-            _ => panic!("Vector can't sub from float!")
+            _ => panic!("Vector can't sub from or to float!")
         } 
     }
 }
