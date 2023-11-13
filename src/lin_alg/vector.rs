@@ -153,6 +153,26 @@ impl Vector {
         self.val.len()
     }
 
+    pub fn max(&self) -> f64 {
+        let mut max = f64::MIN;
+        for i in self.val.iter() {
+            if i > &max {
+                max = *i
+            }
+        };
+        max
+    }
+
+    pub fn min(&self) -> f64 {
+        let mut min = f64::MAX;
+        for i in self.val.iter() {
+            if i < &min {
+                min = *i
+            }
+        };
+        min
+    }
+
     pub fn softmax(&self) -> Self {
         let buf = self.oper(&| i | { i.exp() });
         let sum = buf.sum();
@@ -177,6 +197,22 @@ impl Vector {
 
     pub fn relu_assign(&mut self) {
         self.oper_assign(&| i | { func::relu(i) })
+    }
+
+    pub fn leaky_relu(&self) -> Self {
+        self.oper(&|i| { func::leaky_relu(i) })
+    }
+
+    pub fn leaky_relu_assign(&mut self) {
+        self.oper_assign(&|i| { func::leaky_relu(i) })
+    }
+
+    pub fn tanh(&self) -> Self {
+        self.oper(&|i| { func::tanh(i) })
+    }
+
+    pub fn tanh_assign(&mut self) {
+        self.oper_assign(&|i| { func::tanh(i) })
     }
 }
 

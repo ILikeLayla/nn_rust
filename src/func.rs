@@ -1,3 +1,9 @@
+const LEAKY_RELU_COEF: f64 = 0.1;
+
+pub fn leaky_relu(a: f64) -> f64 {
+    return if a > 0.0 { a } else { LEAKY_RELU_COEF * a }
+}
+
 pub fn relu(a: f64) -> f64 {
     return if a > 0.0 { a } else { 0.0 }
 }
@@ -24,4 +30,8 @@ pub fn sigmoid_diff(a: f64) -> f64 {
 pub fn tanh_diff(a: f64) -> f64 {
     let buf = tanh(a);
     return 1.0 - buf * buf
+}
+
+pub fn leaky_relu_diff(a: f64) -> f64 {
+    return if a > 0.0 { 1.0 } else { LEAKY_RELU_COEF }
 }

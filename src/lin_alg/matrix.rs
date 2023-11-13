@@ -151,11 +151,21 @@ impl Matrix {
     }
 
     pub fn kron_product_assign(&mut self, rhs: Matrix) {
-        *self = self.kron_product(rhs)
+        for i in 0..self.shape.0 {
+            for j in 0..self.shape.1 {
+                let a = (i / rhs.shape.0, j / rhs.shape.1);
+                let b = (i % rhs.shape.0, j % rhs.shape.1);
+                self.change_place((i, j), self.get(a.0, a.1) * rhs.get(b.0, b.1))
+            };
+        };
     }
 
     pub fn strech(&self, times: f64) -> Self {
         self.oper(&|i| {i * times})
+    }
+
+    pub fn strech_assign(&mut self, times: f64) {
+        self.oper_assign(&|i| {i * times})
     }
 
     pub fn get(&self, x: usize, y: usize) -> f64 {
@@ -168,6 +178,28 @@ impl Matrix {
             out.push(i.get_val().clone())
         };
         out
+    }
+
+    pub fn min(&self) -> f64 {
+        let mut min = f64::MAX;
+        for i in self.vec.iter() {
+            let min_buf = i.min();
+            if min > min_buf {
+                min = min_buf
+            }
+        };
+        min
+    }
+
+    pub fn max(&self) -> f64 {
+        let mut max = f64::MIN;
+        for i in self.vec.iter() {
+            let max_buf = i.max();
+            if max < max_buf {
+                max = max_buf
+            }
+        };
+        max
     }
 
     pub fn get_determinant(&self) -> Determinant {
@@ -192,6 +224,10 @@ impl Matrix {
             buf.push(buf_1)
         };
         Matrix::from_vec(buf)
+    }
+
+    pub fn t_assign(&mut self) {
+        *self = self.t()
     }
 
     pub fn exp(&self) -> Self {
@@ -225,17 +261,27 @@ impl Matrix {
     }
 
     pub fn sigmoid(&self) -> Self {
-        let mut buf = self.clone();
-        for i in buf.vec.iter_mut() {
-            i.sigmoid_assign()
-        };
-        buf
+        self.oper(&|i| { func::sigmoid(i) })
     }
 
     pub fn sigmoid_assign(&mut self) {
-        for i in self.vec.iter_mut() {
-            i.sigmoid_assign()
-        }
+        self.oper_assign(&|i| { func::sigmoid(i) })
+    }
+
+    pub fn leaky_relu(&self) -> Self {
+        self.oper(&|i| { func::leaky_relu(i) })
+    }
+
+    pub fn leaky_relu_assign(&mut self) {
+        self.oper_assign(&|i| { func::leaky_relu(i) })
+    }
+
+    pub fn tanh(&self) -> Self {
+        self.oper(&|i| { func::tanh(i) })
+    }
+
+    pub fn tanh_assign(&mut self) {
+        self.oper_assign(&|i| { func::tanh(i) })
     }
 }
 

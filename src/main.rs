@@ -7,5 +7,5 @@ fn main() {
         [4,5,6]
     ]);
     println!("{}", a);
-    println!("{}", a.softmax()) 
+    println!("{}", a.softmax())
 }
