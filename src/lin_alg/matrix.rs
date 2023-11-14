@@ -328,7 +328,7 @@ impl std::ops::Mul for Matrix{
                 for k in 0..self.shape.0 {
                     buf += self.get(k, i) * rhs.get(j, k)
                 };
-                out.change_place((i, j), buf)
+                out.change_place((j, i), buf)
             }
         }
         out
