@@ -52,7 +52,7 @@ impl Matrix {
         Self::from_vec(val).t()
     }
 
-    pub fn from_ver_vec_i(val: Vec<Vec<i32>>) -> Self {
+    pub fn from_ver_vec_i(val: Vec<Vec<i64>>) -> Self {
         let mut buf = Vec::new();
         for i in val.iter() {
             let mut buf_1 = Vec::new();
@@ -118,12 +118,12 @@ impl Matrix {
         }
     }
 
-    pub fn slice<const X: usize, const Y: usize>(&self) -> [[f64; X]; Y] {
-        let mut buf = [[0.0; X]; Y];
-        for i in 0..self.shape.1 {
-            buf[i] = self.vec[i].slice()
-        }
-        buf
+    pub fn slice(&self, place: usize) -> Self {
+        let mut buf = Vec::new();
+        for i in self.vec.iter() {
+            buf.push(i.slice(place))
+        };
+        Self { vec: buf, shape: (place, self.shape.1) }
     }
 
     pub fn sum(&self) -> (Vec<f64>, Vec<f64>) {
@@ -250,55 +250,35 @@ impl Matrix {
         self.oper(&|i| {i.exp()})
     }
 
-    pub fn softmax(&self) -> Self {
-        let mut out = Matrix::new(self.shape);
-        let exp = self.exp();
+    // pub fn softmax(&self) -> Self {
+    //     let mut out = Matrix::new(self.shape);
+    //     let exp = self.exp();
 
-        let mut exp_sum = Vec::new();
-        for i in 0..self.vec[0].len() {
-            let mut sum = 0.0;
-            for j in 0..self.vec.len() {
-                sum += exp.get(i, j)
-            };
-            exp_sum.push(sum)
-        };
+    //     let mut exp_sum = Vec::new();
+    //     for i in 0..self.vec[0].len() {
+    //         let mut sum = 0.0;
+    //         for j in 0..self.vec.len() {
+    //             sum += exp.get(i, j)
+    //         };
+    //         exp_sum.push(sum)
+    //     };
 
-        for i in 0..self.vec.len() {
-            for j in 0..self.vec[0].len() {
-                let val = exp.get(j, i) / exp_sum[j];
-                out.change_place((j, i), val)
-            }
-        };
-        out
-    }
+    //     for i in 0..self.vec.len() {
+    //         for j in 0..self.vec[0].len() {
+    //             let val = exp.get(j, i) / exp_sum[j];
+    //             out.change_place((j, i), val)
+    //         }
+    //     };
+    //     out
+    // }
 
-    pub fn softmax_assign(&mut self) {
-        *self = self.softmax()
-    }
+    // pub fn sigmoid(&self) -> Self {
+    //     self.oper(&|i| { func::sigmoid(i) })
+    // }
 
-    pub fn sigmoid(&self) -> Self {
-        self.oper(&|i| { func::sigmoid(i) })
-    }
-
-    pub fn sigmoid_assign(&mut self) {
-        self.oper_assign(&|i| { func::sigmoid(i) })
-    }
-
-    pub fn leaky_relu(&self) -> Self {
-        self.oper(&|i| { func::leaky_relu(i) })
-    }
-
-    pub fn leaky_relu_assign(&mut self) {
-        self.oper_assign(&|i| { func::leaky_relu(i) })
-    }
-
-    pub fn tanh(&self) -> Self {
-        self.oper(&|i| { func::tanh(i) })
-    }
-
-    pub fn tanh_assign(&mut self) {
-        self.oper_assign(&|i| { func::tanh(i) })
-    }
+    // pub fn tanh(&self) -> Self {
+    //     self.oper(&|i| { func::tanh(i) })
+    // }
 }
 
 impl std::fmt::Display for Matrix {
@@ -323,13 +303,13 @@ impl std::ops::Sub for Matrix {
 
 impl std::ops::AddAssign for Matrix {
     fn add_assign(&mut self, rhs: Self) {
-        *self = self.oper_with(rhs, &|i, j| { i + j })
+        self.oper_with_assign(rhs, &|i, j| { i + j })
     }
 }
 
 impl std::ops::SubAssign for Matrix {
     fn sub_assign(&mut self, rhs: Self) {
-        *self = self.oper_with(rhs, &|i, j| { i - j })
+        self.oper_with_assign(rhs, &|i, j| { i - j })
     }
 }
 
@@ -354,5 +334,18 @@ impl std::ops::Mul for Matrix{
 impl std::ops::MulAssign for Matrix {
     fn mul_assign(&mut self, rhs: Self) {
         *self = self.clone() * rhs
+    }
+}
+
+impl std::ops::Div for Matrix {
+    type Output = Self;
+    fn div(self, rhs: Self) -> Self::Output {
+        self.oper_with(rhs, &|i ,j| { i/j })
+    }
+}
+
+impl std::ops::DivAssign for Matrix {
+    fn div_assign(&mut self, rhs: Self) {
+        self.oper_with_assign(rhs, &|i ,j| { i/j })
     }
 }

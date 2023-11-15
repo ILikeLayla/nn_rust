@@ -1,37 +1,52 @@
-const LEAKY_RELU_COEF: f64 = 0.1;
-
-pub fn leaky_relu(a: f64) -> f64 {
-    return if a > 0.0 { a } else { LEAKY_RELU_COEF * a }
+pub trait Sigmoid {
+    fn sig_for(&self) -> Self;
+    fn sig_back(&self) -> Self;
 }
 
-pub fn relu(a: f64) -> f64 {
-    return if a > 0.0 { a } else { 0.0 }
+pub trait Tanh {
+    fn tanh_for(&self) -> Self;
+    fn tanh_back(&self) -> Self;
 }
 
-pub fn sigmoid(a: f64) -> f64 {
-    return 1.0 / (1.0 + (-a).exp())
+pub trait Relu {
+    fn relu_for(&self) -> Self;
+    fn relu_back(&self) -> Self;
 }
 
-pub fn tanh(a: f64) -> f64 {
-    let exp = a.exp();
-    let exp_ne = (-a).exp();
-    return (exp + exp_ne) / (exp - exp_ne)
+pub trait Softmax {
+    fn soft_for(&self) -> Self;
 }
 
-pub fn relu_diff(a: f64) -> f64 {
-    return if a > 0.0 { 1.0 } else { 0.0 }
+impl Sigmoid for f64 {
+    fn sig_back(&self) -> Self {
+        let buf = self.sig_for();
+        return buf * (1.0 - buf)
+    }
+
+    fn sig_for(&self) -> Self {
+        return 1.0 / (1.0 + (-self).exp())
+    }
 }
 
-pub fn sigmoid_diff(a: f64) -> f64 {
-    let buf = sigmoid(a);
-    return buf * (1.0 - buf)
+impl Relu for f64 {
+    fn relu_for(&self) -> Self {
+        return if self > &0.0 { *self } else { 0.0 }
+    }
+
+    fn relu_back(&self) -> Self {
+        return if self > &0.0 { 1.0 } else { 0.0 }
+    }
 }
 
-pub fn tanh_diff(a: f64) -> f64 {
-    let buf = tanh(a);
-    return 1.0 - buf * buf
-}
+impl Tanh for f64 {
+    fn tanh_for(&self) -> Self {
+        let exp = self.exp();
+        let exp_ne = (-self).exp();
+        return (exp + exp_ne) / (exp - exp_ne)
+    }
 
-pub fn leaky_relu_diff(a: f64) -> f64 {
-    return if a > 0.0 { 1.0 } else { LEAKY_RELU_COEF }
+    fn tanh_back(&self) -> Self {
+        let buf = self.tanh_for();
+        return 1.0 - buf * buf
+    }
 }

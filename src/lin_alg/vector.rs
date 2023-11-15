@@ -78,8 +78,10 @@ impl Vector {
         self.oper_assign(&|i| { i * times })
     }
 
-    pub fn slice<const L: usize>(&self) -> [f64; L] {
-        self.val.clone().try_into().expect("Cannot deal with the length!")
+    pub fn slice(&self, place: usize) -> Self {
+        Self {
+            val: self.val[0..place].to_vec()
+        }
     }
 
     pub fn sum(&self) -> f64 {
@@ -149,6 +151,10 @@ impl Vector {
         self.val.iter()
     }
 
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, f64> {
+        self.val.iter_mut()
+    }
+
     pub fn len(&self) -> usize {
         self.val.len()
     }
@@ -171,48 +177,6 @@ impl Vector {
             }
         };
         min
-    }
-
-    pub fn softmax(&self) -> Self {
-        let buf = self.oper(&| i | { i.exp() });
-        let sum = buf.sum();
-        buf.oper(&| i | { i/sum })
-    }
-
-    pub fn softmax_assign(&mut self) {
-        *self = self.softmax()
-    }
-
-    pub fn sigmoid(&self) -> Self {
-        self.oper(&| i | { func::sigmoid(i) })
-    }
-
-    pub fn sigmoid_assign(&mut self) {
-        self.oper_assign(&| i | { func::sigmoid(i) })
-    }
-
-    pub fn relu(&self) -> Self {
-        self.oper(&| i | { func::relu(i) })
-    }
-
-    pub fn relu_assign(&mut self) {
-        self.oper_assign(&| i | { func::relu(i) })
-    }
-
-    pub fn leaky_relu(&self) -> Self {
-        self.oper(&|i| { func::leaky_relu(i) })
-    }
-
-    pub fn leaky_relu_assign(&mut self) {
-        self.oper_assign(&|i| { func::leaky_relu(i) })
-    }
-
-    pub fn tanh(&self) -> Self {
-        self.oper(&|i| { func::tanh(i) })
-    }
-
-    pub fn tanh_assign(&mut self) {
-        self.oper_assign(&|i| { func::tanh(i) })
     }
 }
 
@@ -249,8 +213,77 @@ impl std::ops::SubAssign for Vector {
     }
 }
 
+impl std::ops::Neg for Vector {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        self.oper(&|i| { -i })
+    }
+}
+
 impl std::fmt::Display for Vector {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({})", self.val.iter().map(|a| {format!("{}", a)}).collect::<Vec<_>>().join(", "))
+    }
+}
+
+impl func::Relu for Vector {
+    fn relu_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.relu_back()
+        };
+        out
+    }
+
+    fn relu_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.relu_back()
+        };
+        out
+    }
+}
+
+impl func::Sigmoid for Vector {
+    fn sig_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.sig_for()
+        };
+        out
+    }
+    
+    fn sig_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.sig_back()
+        };
+        out
+    }
+}
+
+impl func::Tanh for Vector {
+    fn tanh_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.tanh_for()
+        };
+        out
+    }
+
+    fn tanh_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.tanh_back()
+        };
+        out
+    }
+}
+
+impl func::Softmax for Vector {
+    fn soft_for(&self) -> Self {
+        let buf = self.oper(&| i | { i.exp() });
+        let sum = buf.sum();
+        buf.oper(&| i | { i/sum })
     }
 }
