@@ -102,6 +102,14 @@ impl Matrix {
         };
     }
 
+    pub fn iter(&self) -> std::slice::Iter<'_, Vector> {
+        self.vec.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, Vector> {
+        self.vec.iter_mut()
+    }
+
     pub fn change_place(&mut self, place: (usize, usize), val: f64) {
         self.vec[place.1].get_mut_val()[place.0] = val
     }
@@ -365,6 +373,24 @@ impl func::Softmax for Matrix {
                 let val = exp.get(j, i) / exp_sum[j];
                 out.change_place((j, i), val)
             }
+        };
+        out
+    }
+}
+
+impl func::Sigmoid for Matrix {
+    fn sig_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().sig_for()
+        };
+        out
+    }
+
+    fn sig_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().sig_back()
         };
         out
     }
