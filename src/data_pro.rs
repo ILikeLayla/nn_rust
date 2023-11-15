@@ -35,6 +35,10 @@ impl DataSet {
             label: self.label[0..place].to_vec()
         }
     }
+
+    pub fn shape(&self) -> (usize, usize) {
+        self.val.shape()
+    }
 }
 
 impl std::fmt::Display for DataSet {
