@@ -39,6 +39,10 @@ impl DataSet {
     pub fn shape(&self) -> (usize, usize) {
         self.val.shape()
     }
+
+    pub fn data(&self) -> Matrix {
+        self.val.clone()
+    }
 }
 
 impl std::fmt::Display for DataSet {

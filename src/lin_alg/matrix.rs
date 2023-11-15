@@ -119,11 +119,7 @@ impl Matrix {
     }
 
     pub fn slice(&self, place: usize) -> Self {
-        let mut buf = Vec::new();
-        for i in self.vec.iter() {
-            buf.push(i.slice(place))
-        };
-        Self { vec: buf, shape: (place, self.shape.1) }
+        Self { vec: self.vec[0..place].to_vec(), shape: (self.shape.0, place) }
     }
 
     pub fn sum(&self) -> (Vec<f64>, Vec<f64>) {
@@ -347,5 +343,29 @@ impl std::ops::Div for Matrix {
 impl std::ops::DivAssign for Matrix {
     fn div_assign(&mut self, rhs: Self) {
         self.oper_with_assign(rhs, &|i ,j| { i/j })
+    }
+}
+
+impl func::Softmax for Matrix {
+    fn soft_for(&self) -> Self {
+        let mut out = Matrix::new(self.shape);
+        let exp = self.exp();
+
+        let mut exp_sum = Vec::new();
+        for i in 0..self.vec[0].len() {
+            let mut sum = 0.0;
+            for j in 0..self.vec.len() {
+                sum += exp.get(i, j)
+            };
+            exp_sum.push(sum)
+        };
+
+        for i in 0..self.vec.len() {
+            for j in 0..self.vec[0].len() {
+                let val = exp.get(j, i) / exp_sum[j];
+                out.change_place((j, i), val)
+            }
+        };
+        out
     }
 }

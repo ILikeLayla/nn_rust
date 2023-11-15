@@ -9,7 +9,7 @@ impl Vector {
     pub fn new(length: usize) -> Self {
         let mut buf = Vec::new();
         for _ in 0..length {
-            buf.push(0.0)
+            buf.push(0.01)
         };
         Self {
             val: buf
