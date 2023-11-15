@@ -15,5 +15,7 @@ Cargo.lock
 
 
 # Added by cargo
-
 /target
+
+# github's file size limitation
+/data/full_mnist_train.csv

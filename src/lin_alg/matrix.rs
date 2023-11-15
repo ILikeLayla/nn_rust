@@ -48,6 +48,22 @@ impl Matrix {
         Self { vec: buf, shape: (standard_length, val.len()) }
     }
 
+    pub fn from_ver_vec(val: Vec<Vec<f64>>) -> Self {
+        Self::from_vec(val).t()
+    }
+
+    pub fn from_ver_vec_i(val: Vec<Vec<i32>>) -> Self {
+        let mut buf = Vec::new();
+        for i in val.iter() {
+            let mut buf_1 = Vec::new();
+            for j in i.iter() {
+                buf_1.push( *j as f64 )
+            };
+            buf.push(buf_1)
+        };
+        Self::from_ver_vec(buf)
+    }
+
     pub fn shape(&self) -> (usize, usize) {
         self.shape
     }

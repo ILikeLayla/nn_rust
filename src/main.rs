@@ -1,17 +1,7 @@
 mod lin_alg;
 mod func;
+mod data_pro;
 
 fn main() {
-    let mut a = lin_alg::Matrix::from_i([
-        [1,2,3],
-        [4,5,6]
-    ]);
-    let b = lin_alg::Matrix::from_i([
-        [1,3],
-        [0,1],
-        [2,2]
-    ]);
-    a *= b;
-    println!("{}", a);
-    println!("{}", a.softmax());
+    println!("{}", data_pro::DataSet::read_from("D:/code/nn_rust/data/mnist_train.csv"));
 }
