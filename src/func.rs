@@ -25,6 +25,7 @@ impl Sigmoid for f64 {
 
     fn sig_for(&self) -> Self {
         return 1.0 / (1.0 + (-self).exp())
+        // 1 / (1 + e^-x)
     }
 }
 

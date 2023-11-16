@@ -1,3 +1,5 @@
+use crate::func::Tanh;
+
 use super::{Determinant, Vector, DeterNum, func};
 
 #[derive(Clone)]
@@ -126,8 +128,9 @@ impl Matrix {
         }
     }
 
-    pub fn slice(&self, place: usize) -> Self {
-        Self { vec: self.vec[0..place].to_vec(), shape: (self.shape.0, place) }
+    pub fn slice(&self, from: usize, to:usize) -> Self {
+        if from >= to { panic!("The range is unaccpetable!") }
+        Self { vec: self.vec[from..to].to_vec(), shape: (self.shape.0, to - from) }
     }
 
     pub fn sum(&self) -> (Vec<f64>, Vec<f64>) {
@@ -254,35 +257,14 @@ impl Matrix {
         self.oper(&|i| {i.exp()})
     }
 
-    // pub fn softmax(&self) -> Self {
-    //     let mut out = Matrix::new(self.shape);
-    //     let exp = self.exp();
-
-    //     let mut exp_sum = Vec::new();
-    //     for i in 0..self.vec[0].len() {
-    //         let mut sum = 0.0;
-    //         for j in 0..self.vec.len() {
-    //             sum += exp.get(i, j)
-    //         };
-    //         exp_sum.push(sum)
-    //     };
-
-    //     for i in 0..self.vec.len() {
-    //         for j in 0..self.vec[0].len() {
-    //             let val = exp.get(j, i) / exp_sum[j];
-    //             out.change_place((j, i), val)
-    //         }
-    //     };
-    //     out
-    // }
-
-    // pub fn sigmoid(&self) -> Self {
-    //     self.oper(&|i| { func::sigmoid(i) })
-    // }
-
-    // pub fn tanh(&self) -> Self {
-    //     self.oper(&|i| { func::tanh(i) })
-    // }
+    pub fn restrict(&mut self, down: f64, up: f64) {
+        if down >= up { panic!("Unaccpetable range!") }
+        let max = self.max();
+        let min = self.min();
+        let m = (up - down) / (max - min);
+        let c = max * m - up;
+        self.oper_assign(&|x| { m * x - c})
+    }
 }
 
 impl std::fmt::Display for Matrix {
@@ -391,6 +373,42 @@ impl func::Sigmoid for Matrix {
         let mut out = self.clone();
         for i in out.iter_mut() {
             *i = i.clone().sig_back()
+        };
+        out
+    }
+}
+
+impl func::Relu for Matrix {
+    fn relu_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().relu_for()
+        };
+        out
+    }
+
+    fn relu_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().relu_back()
+        };
+        out
+    }
+}
+
+impl func::Tanh for Matrix {
+    fn tanh_for(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().tanh_for();
+        };
+        out
+    }
+
+    fn tanh_back(&self) -> Self {
+        let mut out = self.clone();
+        for i in out.iter_mut() {
+            *i = i.clone().tanh_back()
         };
         out
     }

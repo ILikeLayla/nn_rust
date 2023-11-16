@@ -29,10 +29,10 @@ impl DataSet {
         }
     }
 
-    pub fn slice(&self, place: usize) -> Self {
+    pub fn slice(&self, from: usize, to: usize) -> Self {
         Self {
-            val: self.val.slice(place),
-            label: self.label[0..place].to_vec()
+            val: self.val.slice(from, to),
+            label: self.label[from..to].to_vec()
         }
     }
 
@@ -43,6 +43,18 @@ impl DataSet {
     pub fn data(&self) -> Matrix {
         self.val.clone()
     }
+
+    pub fn target(&self) -> Vec<i64> {
+        self.label.clone()
+    }
+
+    pub fn len(&self) -> usize {
+        self.label.len()
+    }
+
+    // pub fn iter_batch(&self, size: usize, keep_remain: bool) -> std::slice::Iter<'_, Self> {
+
+    // }
 }
 
 impl std::fmt::Display for DataSet {
