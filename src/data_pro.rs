@@ -52,9 +52,9 @@ impl DataSet {
         self.label.len()
     }
 
-    pub fn iter_batch(&self, size: usize, keep_remain: bool) -> std::slice::Iter<'_, Self> {
+    // pub fn iter_batch(&self, size: usize, keep_remain: bool) -> std::slice::Iter<'_, Self> {
         
-    }
+    // }
 }
 
 impl std::fmt::Display for DataSet {
