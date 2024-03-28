@@ -231,6 +231,7 @@ impl Matrix {
 
     pub fn det(&self) -> f64 {
         let deter = self.get_determinant();
+        print!("{}", deter);
         match deter.cal() {
             DeterNum::Float(num) => num,
             DeterNum::Vec(_) => panic!("Shouldn't be here.")
